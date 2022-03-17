@@ -1,0 +1,134 @@
+---
+title: 'Lab 3: Data Manipulation in R'
+author: "Loura Shiny M"
+date: "19/08/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Data Manipulation in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to learn and execute the different concepts 
+under data manipulation in R by doing the instructed questions.
+
+## To study / implement:
+
+From this Lab exercise we will be learning about data manipulation in R.
+
+
+## Dataset Description
+
+For this experiment we will be using the flight dataset from the package 
+nycflights13.
+
+### Name of the Dataset: 
+
+Flight
+
+### Description of the fields : 
+
+The data set contains the details of different flights such as day on which it 
+was boarded, it's departure time, scheduled departure time, origin, destination,
+air time, carrier, flight number, timings, etc.
+
+
+```{r}
+library("nycflights13")
+```
+
+
+```{r}
+View(flights)
+str(flights)
+```
+```{r}
+library(dplyr)
+```
+
+------------------------------------------------------------------------
+
+## Questions
+
+
+1. Find all flights that had an arrival delay of two or more hours.
+
+```{r}
+filter(flights, (arr_delay/60)>=2)
+```
+
+2. Find all flights that had arrived more than two hours late, but didn’t leave 
+late. 
+
+```{r}
+filter(flights, (arr_delay/60)>=2, dep_delay<=0)
+```
+
+3. How many flights have a missing dep_time? 
+
+```{r}
+sum(is.na(flights$dep_time))
+```
+
+4. List the flights that are operated by American Airlines(Carrier is ‘AA’).
+
+```{r}
+filter(flights,carrier=="AA")
+```
+
+5. List the flights that departed during August 2013.
+
+```{r}
+filter(flights,year==2013,month==8)
+```
+
+6. Find the most delayed flights considering their arrival time alone.
+
+```{r}
+x<-arrange(flights,desc(arr_delay))
+head(x)
+```
+
+
+7. List the flights that operate between LGA and IAH airports.
+
+```{r}
+filter(flights,origin=="LGA"|origin=="IAH",dest=="IAH"|dest=="LGA")
+```
+
+8. List the flights that has the destination of IAH.
+
+```{r}
+filter(flights,dest=="IAH")
+```
+
+9. Display the details of the flight that covers the longest distance / shortest 
+distance. (flight number, carrier, origin, destination and distance)
+
+```{r}
+flights%>%filter(distance==max(distance)|distance==min(distance))%>%select(flight,carrier,origin,dest,distance)%>%arrange(distance)
+```
+
+10.Which carrier has the worst delays
+
+```{r}
+flights %>%group_by(carrier) %>%
+summarise(arr_delay = mean(arr_delay, na.rm = TRUE))%>%arrange(desc(arr_delay))
+```
+
+* * *
+## Conclusion:
+Using the dataset flights, we learned about how to manipulate a dataset according to our needs.
+
+
+
