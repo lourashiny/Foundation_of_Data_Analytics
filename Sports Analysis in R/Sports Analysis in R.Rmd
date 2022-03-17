@@ -1,0 +1,334 @@
+---
+title: 'Lab 9: Sports Analysis in R'
+author: "Loura Shiny M"
+date: "21/10/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Sports Analysis in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to perform descriptive and predictive 
+analytics from a suitable dataset chosen in sports domain. The dataset can be 
+either for regression or classification. 
+
+## To study / implement:
+
+From this Lab exercise we will be learning about Sport Ananlysis in R. 
+
+
+## Dataset Description:
+
+This dataset Toughesht Sports by Skill ranks the toughest sports on their skill
+level by ESPN. They include factors such as endurance, strength, power, speed, 
+agiligty, flexibility, etc. 
+
+https://www.kaggle.com/rishidamarla/toughest-sports-by-skill
+
+
+## Objectives:
+
+The objective her is to perform descriptive and predictive analytics for the 
+chosen dataset - Toughest Sports by Skill. The descriptive analysis will give a 
+summary of the dataset and answer the questions asked in that section
+and using linear regression we will do predictive analysis. 
+
+------------------------------------------------------------------------
+
+
+## Pre-Processing:
+
+## Sequence of Steps:
+
+
+### Importing required libraries 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(datarium)
+```
+
+
+### Importing Dataset
+
+```{r}
+sports = read.csv("toughestsport.csv")
+```
+
+
+### View structure of dataset 
+
+```{r}
+str(sports)
+```
+
+
+### Perform Data Clenaing
+
+```{r}
+names(sports)[names(sports) == 'ï..SPORT'] <- "SPORT"
+```
+
+Here we'll change the name of the column from "ï..SPORT" to "SPORT" for 
+readability purpose.
+
+
+Structure of dataset
+
+```{r}
+str(sports)
+```
+
+
+### Removing missing values 
+
+```{r}
+sports = na.omit(sports)
+```
+
+
+### Summary of the dataset 
+
+```{r}
+summary(sports)
+```
+
+
+## Descriptive Analysis:
+
+##### Range of Durability
+
+```{r}
+range(sports$DUR)
+```
+
+The range od the Durability ranges from 0.75 to 8.50
+
+
+##### Histogram of Endurance
+
+```{r}
+hist(sports$END,main="Endurance in Sports",xlab="Endurance")
+```
+
+
+##### Division of how much power is required to play the sports in the first 5 ranks 
+
+```{r}
+x=sports %>% filter(RANK %in% c(1,2,3,4,5))
+y=table(x$PWR)
+pie(y,col=c("red","green","blue","yellow","orange"),main="Power")
+```
+
+
+The pie chart (pictorial representation) of the power among the first 5 sports.
+
+##### Boxplot of speed
+
+```{r}
+boxplot(sports$SPD,mai="Speed")
+```
+
+Box plots shows that there is no outlier detected.
+
+
+##### Plotting the agility of the sports
+
+```{r}
+plot(sports$AGI,type="b",ylab="Agility")
+```
+
+As the rank value of agility increases the rank of the sport goes up.
+
+
+## Predictive Analysis:
+
+### Model Building
+
+Now to perform linear regression we need to remove the SPORT column. Thus, 
+
+```{r}
+sports_data=sports[,-c(1)]
+str(sports_data)
+```
+
+
+##### Train the data considering TOTAL from the dataset
+
+```{r}
+set.seed(123)
+train_samples <- sports_data$TOTAL %>%
+createDataPartition(p=0.8,list=FALSE)
+```
+
+
+##### Split the data into training and testing data
+
+```{r}
+train <- sports_data[train_samples,]
+test <- sports_data[-train_samples,]
+```
+
+
+##### Build Linear model for the TOTAL and other columns in the datset. 
+We need to see which attribute has best p-values
+
+
+```{r}
+sports_model<- lm(TOTAL~.,data=sports_data)
+summary(sports_model)
+```
+
+
+From summary we can see that Adjusted R-squared values is 1. This is good as it 
+indicates that a large propotion of the variability in the outcome has been 
+explained by the regression model. Plus, 3 *'s (pr lesser than 0.05 ) for the 
+columns END, STR, PWR, SPD, AGI, FLX, NER, DUR, HAN, ANA show that we can use 
+them to build linear model. 
+
+Now, considering STR (strength) and total fo our model.
+
+
+##### Outlier Detection
+
+```{r}
+boxplot(sports_data$STR,ylab="STR")
+```
+
+No, outlier is detected from boxplot.
+
+
+### Performance analysis:
+
+##### Predicting the test
+
+```{r}
+sp<- sports_model%>%predict(test)
+```
+
+
+##### Finding RMSE
+
+```{r}
+RMSE <- RMSE(sp,test$TOTAL)
+RMSE
+```
+
+The RMSE value is near to 0 which implese that a good outcome for the model.
+
+
+##### Finding R2
+
+```{r}
+R2 <- R2(sp,test$TOTAL)
+R2
+```
+
+The R2 value is great. This means the model output will be better.
+
+
+##### Correlation Analysis
+
+```{r}
+cor(sports_data$STR,sports_data$TOTAL)
+```
+
+Positive value indicates that the that there is positive correlation between 
+STR and TOTAL, i.e., they are directly  propositional to each other. 
+
+
+##### Linear Model between TOTAL and STR
+
+```{r}
+model <- lm(TOTAL~STR,data=sports_data)
+model
+```
+
+
+```{r}
+summary(model)
+```
+
+
+```{r}
+sigma(model) 
+```
+
+
+```{r}
+sigma(model)*100/mean(sports_data$TOTAL)  #percentage error
+```
+
+The percentage of error is 18%.
+
+
+```{r}
+confint(model)
+```
+
+
+##### Finding the confidence of STR
+
+```{r}
+STR=6.05
+sdt <- data.frame(STR)
+conf<- predict(model,sdt,level = .95,interval = "confidence")
+conf
+```
+
+
+##### Finding the prediction of STR
+
+```{r}
+sp <- predict(model,sdt,level = .95,interval = "prediction")
+sp
+```
+
+
+##### Plotting model
+
+```{r}
+plot(model,1)
+```
+
+
+
+
+------------------------------------------------------------------------
+
+
+## Results and Discussion: 
+
+From descriptive and predictive analysis we got the desired results. 
+In descriptive analysis, we can visualize the data from according to one's wish 
+using different graphs. Using linear regression, we can predict the values of 
+TOTAL from all the attributes as all of them had 3 *'s. And the example with 
+strength, STR was shown.
+
+
+* * *
+## Conclusion:
+Using the dataset Toughest Sports by Skill we learnt about Descriptive and 
+Predictive Analysis in R by performing them on the dataset.
+
+
+## References:
+
+https://pestleanalysis.com/descriptive-analysis/
+https://machinelearningmastery.com/classification-versus-regression-in-machine-learning/
+https://machinelearningmastery.com/machine-learning-in-r-step-by-step/
+s

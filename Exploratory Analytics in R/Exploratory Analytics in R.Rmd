@@ -1,0 +1,139 @@
+---
+title: 'Lab 5: Exploratory Analytics'
+author: "Loura Shiny M"
+date: "10/09/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Exploratory Analytics in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to learn and execute the different concepts 
+under Exploratory Analytics in R by practicing different questions.
+
+## To study / implement:
+
+From this Lab exercise we will be learning about Exploratory Analytics.
+
+
+## Dataset Description:
+
+The dataset used is from package MASS. The Student Survey Dataset is pool of 
+information on various deatails collected from students at the University of 
+Adelaide. It contains information such as the sex of the student, their height, 
+age, pulse, which hand they use to write, fold, clap,etc. 
+
+### Name of the Dataset: 
+
+Student Survey Dataset
+
+------------------------------------------------------------------------
+
+## Questions
+
+
+Loading in the dataset:
+
+```{r}
+library(MASS)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+str(survey)
+```
+
+```{r}
+survey=na.omit(survey)
+```
+
+
+1. Filter out the females students who clap with their left hand on top. 
+
+```{r}
+x=survey%>% filter(Sex=="Female" & Clap=="Left")
+x
+```
+
+2. Get the details of students who don't exercise at all.
+
+```{r}
+filter(survey,Exer=="None")
+```
+
+3. Plot the height of the students.
+
+```{r}
+plot(survey$Height,type="b",ylab="Height")
+```
+
+4. Plot the age against the height of the students.
+
+```{r}
+plot(survey$Height,survey$Age, xlab="Height",ylab="Age")
+```
+
+5. Plot a histogram to view the pulse frequency of the different students.
+
+```{r}
+hist(survey$Pulse,main="Pulse",xlab="Pulse")
+```
+
+6.Show the differnce in the number of left handede and right handed students 
+using a bar graph.
+
+```{r}
+x=table(survey$W.Hnd)
+barplot(x,main="Left and Right Handed  Students", xlab="WritingHand", ylab="Value",col=c("Blue","Pink"),legend = rownames(x))
+```
+
+
+7. Box plot the age of the students.
+
+```{r}
+boxplot(survey$Age,main="Age")
+```
+
+8. Show the different type of somkers using bar graph.
+
+```{r}
+x=table(survey$Smoke)
+barplot(x,main="Type of Smokers",xlab="Smoking Frequency",ylab="Number",col=c("Blue","Pink","Yellow","Green"),legend = rownames(x))
+```
+
+9.Plot a histogram of non-writing hand of the students.
+
+```{r}
+hist(survey$NW.Hnd,mai="Non-Writing Hand",xlab="Values")
+```
+
+
+10.Show in a pie chart on how many students gave in their heights in metrics and 
+how many in imperial.
+
+```{r}
+x=survey %>% filter(Sex=="Male" & W.Hnd=="Left")
+y=table(x$M.I)
+pie(y,col=c("red","green"),main="M.I")
+```
+
+
+* * *
+## Conclusion:
+Using the dataset of The Student Survey, we learned to do Exploratory Analytics
+by using various concepts of data visualization.
+

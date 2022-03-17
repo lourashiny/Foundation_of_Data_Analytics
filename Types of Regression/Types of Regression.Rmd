@@ -1,0 +1,564 @@
+---
+title: 'Lab 11: Challenging Task'
+author: "Loura Shiny M"
+date: "18/11/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Types of Regression
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is design an a regression model to predict the 
+given variables by by applying a suitable variable. 
+
+## To study / implement:
+
+From this Lab exercise we'll learn more about regressions and it's types.  
+
+
+## Dataset Description:
+
+This dataset contains sample numbers and values associated with it under 
+columns x1,x2,x3,y1,y2 and z1. 
+
+
+## Objectives:
+
+The objective her is to do the tasks assigned 
+
+------------------------------------------------------------------------
+
+
+##Questions:
+
+Consider the given dataset, apply a suitable algorithm to design the 
+regression models to predict y1, y2 and z1. 
+
+Model 1: Inputs: x1, x2 x3 and Output: y1
+Model 2: Input: x1,x2,x3 and Output: y2
+Model 3: Input x1,x2,x3,y1, y2 and Output: z1
+
+
+## Pre-Processing:
+
+## Sequence of Steps:
+
+
+### Importing required libraries 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(datarium)
+library(Metrics)
+library(magrittr)
+library(glmnet)
+library(workflows)
+```
+
+
+### Importing Dataset
+
+```{r}
+Challenge_Train=read.csv("Challenge_Train.csv",header=FALSE)
+```
+
+```{r}
+Challenge_Test=read.csv("Challenge_Test.csv",header=FALSE)
+```
+
+
+### View structure of dataset 
+
+```{r}
+str(Challenge_Train)
+```
+
+
+```{r}
+str(Challenge_Test)
+```
+
+
+```{r}
+colnames(Challenge_Train)
+names(Challenge_Train)[1] = "S_no"
+names(Challenge_Train)[2]= "X1"
+names(Challenge_Train)[3] = "X2"
+names(Challenge_Train)[4] = "X3"
+names(Challenge_Train)[5] = "Y1"
+names(Challenge_Train)[6] = "Y2"
+names(Challenge_Train)[7] = "Z1"
+colnames(Challenge_Train)
+```
+
+
+```{r}
+colnames(Challenge_Test)
+names(Challenge_Test)[1] = "S_no"
+names(Challenge_Test)[2]= "X1"
+names(Challenge_Test)[3] = "X2"
+names(Challenge_Test)[4] = "X3"
+names(Challenge_Test)[5] = "Y1"
+names(Challenge_Test)[6] = "Y2"
+names(Challenge_Test)[7] = "Z1"
+colnames(Challenge_Test)
+```
+
+### Perform Data Clenaing
+
+
+### Removing missing values 
+
+```{r}
+Challenge_Train=na.omit(Challenge_Train)
+Challenge_Test=na.omit(Challenge_Test)
+```
+
+
+### View structure of dataset 
+
+```{r}
+str(Challenge_Train)
+```
+
+
+```{r}
+str(Challenge_Test)
+```
+
+### Summary of the dataset 
+
+```{r}
+summary(Challenge_Train)
+```
+
+
+```{r}
+summary(Challenge_Test)
+```
+
+
+##Model - 2
+
+Model 2: Input: x1,x2,x3 and Output: y2
+
+```{r}
+Challenge_Train=Challenge_Train[,-c(1,5,7)]
+names(Challenge_Train)
+```
+
+```{r}
+Challenge_Test=Challenge_Test[,-c(1,5,7)]
+names(Challenge_Test)
+```
+
+
+1. Normalize the values. Mention the normalization method followed.
+
+To choose the right normalization method, we'll first understand the data.
+
+Log-Normalization:
+
+```{r}
+train_data=log(Challenge_Train)
+```
+
+```{r}
+test_data=log(Challenge_Test)
+```
+
+
+Find the correlation between
+
+a. the explanatory variables and individual response variables (y2)
+b. List out those variable names. 
+c. Present the inference graphically (like scatter plot etc...) and explain. 
+
+
+Finding correlation between the variables
+
+```{r}
+cor(train_data)
+```
+
+Y2 is positively 
+Moderately correlated with X1 and X2
+Weakly correlated with X3
+
+Sactter Plot
+
+```{r}
+a=train_data$Y2
+b=train_data$X1
+c=train_data$X2
+d=train_data$X3
+```
+
+X1 vs Y2
+
+```{r}
+plot(b,a,main="X1 vs Y2",xlab="X1",ylab="Y2")
+abline(lm(b~a),col="blue")
+lines(lowess(b,a),col="red")
+```
+
+
+X2 vs Y2
+
+```{r}
+plot(c,a,main="X2 vs Y2",xlab="X2",ylab="Y2")
+abline(lm(c~a),col="blue")
+lines(lowess(c,a),col="red")
+```
+
+
+X3 vs Y2
+
+```{r}
+plot(d,a,main="X3 vs Y2",xlab="X3",ylab="Y2")
+abline(lm(d~a),col="blue")
+lines(lowess(d,a),col="red")
+```
+
+
+Apply suitable regression technique (Simple Linear, Lasso, Ridge and ElasticNet) 
+
+
+###Linear Regression:
+
+```{r}
+linear_model<-lm(Y2 ~.,data=train_data)
+s=summary(linear_model)
+s
+```
+
+
+```{r}
+coef(linear_model)
+```
+
+
+```{r}
+lp<-linear_model%>%predict(test_data)
+```
+
+```{r}
+lRMSE <- RMSE(lp,test_data$Y2)
+lRMSE
+lR2 <- R2(lp,test_data$Y2)
+lR2
+lMAE<-mae(test_data$Y2,lp)
+lMAE
+lMSE=mean(s$residuals^2)
+lMSE
+lAR2=s$adj.r.squared
+lAR2
+```
+
+
+Model 2: Linear Regression
+
+i) Mean Absolute Error       : 0.2009208
+ii) Mean Square Error        : 0.005402406
+iii) Root Mean Square Error  : 0.213569
+iv) R-Squared                : 0.5970317
+v) Adjusted R-squared.       : 0.6976177
+
+
+
+```{r}
+x_train <- data.matrix(train_data[1:3])
+y_train <- train_data$Y2
+x_test <- data.matrix(test_data[1:3])
+y_test <- test_data$Y2
+```
+
+
+###Lasso Regression:
+
+```{r}
+lambdas <- 10^seq(2, -3, by = -.1)
+
+# Setting alpha = 1 implements lasso regression
+lasso_reg<- cv.glmnet(x_train,y_train, alpha = 1,lambda=lambdas,standardize=TRUE,nfolds=5)
+
+# Best 
+lambda_bestl <- lasso_reg$lambda.min 
+lambda_bestl
+```
+
+
+```{r}
+lasso_model<- glmnet(x_train,y_train,alpha = 1,lambda=lambda_bestl,standardize = TRUE)
+```
+
+
+```{r}
+coef(lasso_model)
+```
+
+
+```{r}
+lap<-lasso_model%>%predict(x_test)
+```
+
+
+```{r}
+laRMSE <- RMSE(lap,y_test)
+laRMSE
+laR2 <- R2(lap,y_test)
+laR2
+laMAE<-mae(y_test,lap)
+laMAE
+laMSE=mse(y_test,lap)
+laMSE
+laAR2=(1-(1.0454*(1-laR2)))
+laAR2
+```
+
+
+Note: 
+AR2 = 1 -((N-1)/(N-1-p)(1-R2))
+N:Number of Rows in train
+p: Number of regression variables 
+
+
+Model 2: Lasso Regression
+
+i) Mean Absolute Error       : 0.2028554
+ii) Mean Square Error        : 0.04630413
+iii) Root Mean Square Error  : 0.215184
+iv) R-Squared                : 0.597004
+v) Adjusted R-squared.       : 0.578708
+
+
+###Ridge Regression:
+
+```{r}
+# alpha=0 - Ridge
+# alpha=1 - Lasso
+# 0<alpha<1 - Elastic Net
+ridge_model<-glmnet(x_train,y_train,alpha = 0,standardize=TRUE)
+summary(ridge_model)
+```
+
+```{r}
+#identify the lambda value that produces the lowest test MSE by using k-fold cross-validation.
+cv_ridge_model<- cv.glmnet(x_train,y_train,alpha = 0,standardize=TRUE)
+best_lambda <- cv_ridge_model$lambda.min
+best_lambda
+```
+
+
+```{r}
+#analyze the final model produced by the optimal lambda value.
+ridge_model_l<- glmnet(x_train,y_train,alpha=0,standardize=TRUE,lambda = best_lambda)
+s=summary(ridge_model_l)
+s
+```
+
+
+```{r}
+coef(ridge_model_l)
+```
+
+```{r}
+rp<-ridge_model_l%>%predict(x_test)
+```
+
+
+```{r}
+rRMSE <- RMSE(rp,y_test)
+rRMSE
+rR2 <- R2(rp,y_test)
+rR2
+rMAE<-mae(y_test,rp)
+rMAE
+rMSE=mse(y_test,rp)
+rMSE
+rAR2=(1-(1.0454*(1-rR2)))
+rAR2
+```
+
+
+Model 2: Ridge Regression
+
+i) Mean Absolute Error       : 0.2049809
+ii) Mean Square Error        : 0.04688555
+iii) Root Mean Square Error  : 0.2165307
+iv) R-Squared                : 0.5970317
+v) Adjusted R-squared.       : 0.5787369
+
+
+###Elastic Net Regression:
+
+
+```{r}
+#identify the lambda value that produces the lowest test MSE by using k-fold cross-validation.
+cv_elastic_model<- cv.glmnet(x_train,y_train,alpha = 0.1599373,standardize=TRUE)
+best_lambda <- cv_elastic_model$lambda.min
+best_lambda
+```
+
+
+```{r}
+elasticnet_model= glmnet(x_train,y_train,lambda=best_lambda, family='gaussian',                          intercept = F, alpha=0.1599373)
+s=summary(elasticnet_model)
+s
+```
+
+
+```{r}
+coef(elasticnet_model)
+```
+
+
+
+```{r}
+ep<-elasticnet_model%>%predict(x_test)
+```
+
+
+```{r}
+eRMSE <- RMSE(ep,test_data$Y2)
+eRMSE
+eR2 <- R2(ep,test_data$Y2)
+eR2
+eMAE<-mae(test_data$Y2,ep)
+eMAE
+eMSE=mse(test_data$Y2,ep)
+eMSE
+eAR2=(1-(1.0454*(1-eR2)))
+eAR2
+```
+
+Model 2: Elastic Net Regression
+
+i) Mean Absolute Error       : 0.1978528
+ii) Mean Square Error        : 0.04474566
+iii) Root Mean Square Error  : 0.2115317
+iv) R-Squared                : 0.5972791
+v) Adjusted R-squared.       : 0.5789955
+
+
+
+5. Which regression model is suitable for this dataset and why? 
+Write the obtained regression equation. (for all the models separately).
+
+For Model 2, Linear regression proves to be good as all the performance metrics 
+values are in the range we need them to be. MAE, MSE and RMSE are really small
+values, close to 0. Then R square and Adjusted R square are close to 1. 
+
+
+Linear: Y2 = 0.08687246 +  0.16274034*X1 + 0.27822223*X2 + 0.12772468*X3    
+Lasso: Y2 = 0.1175269 + 0.1608196*X1 + 0.2743582*X2 + 0.1242077*X3    
+Ridge: Y2 = 0.1937439 + 0.1533360*X1 + 0.2621445*X2 + 0.1203438*X3    
+Elastic: Y2 = 0.1659886*X1 + 0.3010939*X2 + 0.1335481*X3      
+        
+
+Note:
+Adjusted R-squared values is close to 1.
+The RMSE value is near to 0 which implese that a good outcome for the model.
+The R2 value is great. This means the model output will be better. - clsoe to 1
+
+
+6. Compare all the regression models in terms of the following performance metrics
+
+
+Model 2: Linear Regression
+
+i) Mean Absolute Error       : 0.2009208
+ii) Mean Square Error        : 0.005402406
+iii) Root Mean Square Error  : 0.213569
+iv) R-Squared                : 0.5970317
+v) Adjusted R-squared.       : 0.6976177
+
+
+Model 2: Lasso Regression
+
+i) Mean Absolute Error       : 0.2028554
+ii) Mean Square Error        : 0.04630413
+iii) Root Mean Square Error  : 0.215184
+iv) R-Squared                : 0.597004
+v) Adjusted R-squared.       : 0.578708
+
+
+Model 2: Ridge Regression
+
+i) Mean Absolute Error       : 0.2049809
+ii) Mean Square Error        : 0.04688555
+iii) Root Mean Square Error  : 0.2165307
+iv) R-Squared                : 0.5970317
+v) Adjusted R-squared.       : 0.5787369
+
+
+Model 2: Elastic Net Regression
+
+i) Mean Absolute Error       : 0.1978528
+ii) Mean Square Error        : 0.04474566
+iii) Root Mean Square Error  : 0.2115317
+iv) R-Squared                : 0.5972791
+v) Adjusted R-squared.       : 0.5789955
+
+
+7. Summarize and tabulate the result of every regression method chosen by you.
+
+```{r}
+df=data.frame(Y2_actual=y_test,Y2_predict=lp)
+write.csv(df,"Challenging_Task_Result.csv")
+```
+
+
+8. Present the inference with necessary graphs and report the best model.
+
+```{r}
+qqnorm(linear_model$residuals,ylab = "Residuals")
+qqline(linear_model$residuals)
+```
+
+```{r}
+par(mar=c(2,2,2,2))
+ggplot(linear_model,aes(x=X1,y=Y2))+geom_point()+geom_smooth(method='lm',se=FALSE)
+```
+
+
+Linear Regression is suitable for Model 2 with exploratory variable 
+X1, X2, X3 and response variables Y2. 
+
+Model 2: Linear Regression
+
+i) Mean Absolute Error       : 0.2009208
+ii) Mean Square Error        : 0.005402406
+iii) Root Mean Square Error  : 0.213569
+iv) R-Squared                : 0.5970317
+v) Adjusted R-squared.       : 0.6976177
+
+Regression Equation: 
+Y2 = 0.08687246 +  0.16274034*X1 + 0.27822223*X2 + 0.12772468*X3  
+
+
+------------------------------------------------------------------------
+
+* * *
+## Conclusion:
+
+Using the given dataset we learnt about the different types of regression.
+We can conclude by saying that Linear Regression is good for Model - 2. 
+
+
+
+

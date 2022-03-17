@@ -1,0 +1,223 @@
+---
+title: 'Lab 4: Data Cleaning in R'
+author: "Loura Shiny M"
+date: "26/08/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Data Cleaning in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to learn and execute the different concepts 
+under data cleaning in R by doing the instructed questions for any dataset of 
+choice.
+
+## To study / implement:
+
+From this Lab exercise we will be learning about data cleaning in R.
+
+
+## Dataset Description:
+
+The dataset Throw Competitions Top 100 Marks, contains the information about the 
+top 100 sport people from each discipline. I have choosen the disciple Discus 
+throw under Men. It conatins their rank, mark, competitor's name, day of birth,
+nationality, position, venue, date, and result score.
+
+https://www.kaggle.com/ricfraga/throw-competition-data/version/1
+
+### Name of the Dataset: 
+
+Discus Throw Men Throw Competitions Top 100 Marks
+
+### Description of the fields : 
+
+The Discus Throw Men Competitions Top 100 Marks dataset contains the detaisl of 
+their rank, mark, competitor's name, day of birth, nationality, position, venue,
+date, and result score.
+
+------------------------------------------------------------------------
+
+## Questions
+
+1. Identify a suitable dataset and describe the dataset.
+
+```{r}
+throw<-read.csv(file='Discus Throw Men.csv')
+```
+
+```{r}
+str(throw)
+```
+
+The dataset I have choosen is the Throw Competitions Top 100 Marks. Under this 
+I have choosen the throw sport Discus for Men. The dataset contains Discus Throw 
+Men Competitions Top 100 Marks. it contains details such as their rank, mark, 
+competitor's name, day of birth, nationality, position, venue, date of 
+competition,and result score.
+
+
+2. List all the variable/attribute names.
+
+```{r}
+names(throw)
+```
+
+
+3. Identify the mislabeled / long variable names and change them into shorter 
+names.
+
+```{r}
+names(throw)[names(throw) == 'X'] <- "S.No"
+```
+
+```{r}
+names(throw)
+```
+
+
+4. Check whether your data contains any unique ID as one of the variables.
+Remove the duplicates in uniqueID, if present.
+
+```{r}
+any(duplicated(throw$S.No))
+```
+
+5. Check for any inconsistencies in the string data. Eg. Male/male/m/M. 
+Change them to common format using appropriate method.
+
+```{r}
+throw[throw$Rank=="1f1"]<-1
+```
+
+```{r}
+library(dplyr)
+filter(throw,Rank=="1f1")
+```
+
+As you can see the rows with isconsistent Rank 1f1 is changed to 1.
+
+
+6. Check for any invalid values in your dataset. Eg. Age of a person 600..
+
+```{r}
+summary(throw$Position)
+```
+
+Positions cannot be a negative value but here the minimum value for Position is 
+mentioned as -1. Now, we'll change these values to 1.
+
+```{r}
+throw$Position[which(throw$Position==-1)]<-1
+```
+
+```{r}
+summary(throw$Position)
+```
+
+
+7. Check for the missing values. Apply appropriate method to fix it and justify 
+it. 
+
+```{r}
+sapply(throw,function(x)sum(is.na(x)))
+```
+
+From the above result we can see that the columns Marks and Result.Score have 
+missing values.
+
+
+a. Removing that variable - Marks and Result.Score are essential variable. 
+So, no we cannot remove them.
+
+```{r}
+#throw=subset(throw,select=-c(Mark,ResultScore))
+```
+
+b. Removing the samples - For the given situation this might be the best 
+solution. We can just remove the rows which contain missing data.
+
+```{r}
+throw<-na.omit(throw)
+```
+
+```{r}
+sapply(throw,function(x)sum(is.na(x)))
+```
+
+
+c. Imputing the missing values - There a few ways through which we can input 
+missing values. One is by taking the mean or the median and put that way in the
+place of the missing value. The other way is to enter the value which has the 
+maximum count in categorical data. But this method won't be right for this data 
+as here each player will have a unique mark and result score and cannot be 
+computed from the mean. If it was done, it would have been done like this:
+
+throw$Mark[is.na(throw$Mark)]<-median(throw$Mark,na.rm = TRUE)
+throw(is.na(throw$Mark))
+
+throw$Result.Score[is.na(throw$Result.Score)]
+<-mean(throw$Result.Score,na.rm = TRUE)
+throw(is.na(throw$Result.Score))
+
+```{r}
+library(dplyr)
+```
+
+
+8. Form at least 5 questions by yourself to explore your data set and to get 
+useful 
+insights from that data. Apply appropriate data manipulation commands to achieve 
+the 
+same
+
+a. Get the details of all the players from USA.
+
+```{r}
+filter(throw,Nationality=="USA")
+```
+
+b. Get the details of the players who have Rank 50
+
+```{r}
+filter(throw,Rank==50)
+```
+
+c. Find players who played in Salinas, CA (USA) and had a Result Score over 1280.
+
+```{r}
+filter(throw,Venue=="Salinas, CA (USA)",ResultScore>1280)
+```
+
+d. Get the DOB and Name of the competitor from EST
+
+```{r}
+throw%>%filter(Nationality=="EST")%>%select(Competitor, Nationality, Mark, DOB)
+```
+
+e. Find the maximum Mark scored in each nation.
+
+```{r}
+throw%>%group_by(Nationality) %>%
+summarise(Max_Mark=max(Mark))%>%arrange(desc(Max_Mark))
+```
+
+
+* * *
+## Conclusion:
+Using the dataset of  Discus throw under Men, we learned about how to 
+clean a dataset according to our needs.
+
+
+

@@ -1,0 +1,165 @@
+---
+title: 'Lab 8: Data Regression in R'
+author: "Loura Shiny M"
+date: "07/10/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Data Regression in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to learn about and execute the different 
+problems under regression in R. 
+
+## To study / implement:
+
+From this Lab exercise we will be learning about Data Regression in R.
+
+
+## Dataset Description:
+
+The dataset weatherHistory is taken from Kaggle. It is a dataset meant to work on 
+regression analysis. It includes a hourly/daily summary for Szeged, Hungary area, 
+between 2006 and 2016. It contanins attributes such as time, summary, precipType,
+temperature, humidity, windSpeed, pressure, etc. 
+
+Dataset link: https://www.kaggle.com/budincsevity/szeged-weather
+
+
+------------------------------------------------------------------------
+
+## Questions
+
+------------------------------------------------------------------------
+
+
+Importing required libraries 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(datarium)
+```
+
+
+Importing Dataset
+
+```{r}
+weather = read.csv("weatherHistory.csv")
+weather = na.omit(weather)
+weather=head(weather,1000) #to get a preview of the dataset
+weather=subset(weather, select = -c(Loud.Cover,Formatted.Date,Summary,Precip.Type,Daily.Summary) )
+```
+
+Structure of dataset
+
+```{r}
+str(weather)
+```
+
+
+Summary of the dataset weatherHistory
+
+```{r}
+summary(weather)
+```
+
+
+The task for this dataset is to predict the apparent temperature. Thus, first 
+train the model according to the apparent temperature. 
+
+```{r}
+set.seed(123)
+train_samples <- weather$Apparent.Temperature..C. %>%
+  createDataPartition(p=0.8,list=FALSE)
+```
+
+```{r}
+head(train_samples)
+```
+
+Now assign train and test datas
+
+```{r}
+train <- weather[train_samples,]
+test <- weather[-train_samples,]
+```
+
+
+Now building linear model for apparent temperature and the other attributes
+
+```{r}
+wl <- lm(Apparent.Temperature..C.~.,data=weather)
+summary(wl)
+```
+
+Inference: Residual median is equal to 1. As p-values of Humidity and Temperature
+is less than 0.05, we can predict the values of apparent temperature from 
+those values. Adjusted R- squared is 0.9889 which is equal to 1 tells that the 
+model can work as a regression model.
+
+Predict the test
+
+```{r}
+pred <- wl %>%
+  predict(test)
+```
+
+
+Finding RMSE
+
+```{r}
+r<- RMSE(pred,test$Apparent.Temperature..C.)
+r
+```
+
+
+Finding R2
+
+```{r}
+r2 <- R2(pred,test$Apparent.Temperature..C.)
+r2
+```
+
+Histogram of the model 
+
+```{r}
+hist(wl$residuals)
+```
+
+Qqnorm
+
+```{r}
+qqnorm(wl$residuals,ylab="Residuals")
+qqline(wl$residuals)
+```
+
+```{r}
+par(mar=c(2,2,2,2))
+ggplot(weather,aes(x=Humidity,y=Apparent.Temperature..C.))+geom_point()+geom_smooth(method='lm',se=FALSE)
+```
+
+
+```{r}
+cor(weather$Humidity,weather$Apparent.Temperature..C.)
+```
+Since we get a negative value we can say that Apparent temperature and humidity 
+are inversely propositional to each other. 
+
+
+* * *
+## Conclusion:
+Using the dataset weatherHistory we learnt about Regression in R.

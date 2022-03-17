@@ -1,0 +1,200 @@
+---
+title: 'Lab 6: Missing Data in R'
+author: "Loura Shiny M"
+date: "23/09/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Missing Data in R
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to learn and execute about the different 
+concepts under missing data. We'll see how one can view the amount of NA data
+in today's Lab
+
+## To study / implement:
+
+From this Lab exercise we will be learning about Missing Data in R.
+
+
+## Dataset Description:
+
+The dataset used is mtcars (Motor Trend Car Road Tests). It is available in .
+The data was extracted from the 1974 Motor Trend US magazine, and comprises 
+fuel consumption and 10 aspects of automobile design and performance for
+32 automobiles (1973–74 models). It consists of many attributes like mpg, cyl,
+hp, drat, wt, etc
+
+
+------------------------------------------------------------------------
+
+## Questions
+
+
+Loading in the dataset:
+
+```{r}
+data <- mtcars
+data
+```
+
+Summary of data
+```{r}
+summary(data)
+```
+
+
+Install required package
+
+```{r}
+#install.packages("missForest")
+```
+
+```{r}
+#install.packages("mice")
+```
+
+```{r}
+#install.packages("VIM")
+```
+
+Load library
+
+```{r}
+library(missForest)
+```
+
+```{r}
+library(mice) 
+```
+
+```{r}
+library(VIM)
+```
+
+
+```{r}
+set.seed(10)  #random number generated 
+```
+
+------------------------------------------------------------------------
+
+## With NA probability 10% :
+
+```{r}
+datan <- prodNA(data, noNA = 0.1)
+datan
+```
+
+```{r}
+md.pattern(datan)
+#shows the pattern of occurences of NA values
+```
+
+```{r}
+datamiss = aggr(datan, col=mdc(1:2), numbers=TRUE, sortVars=TRUE, 
+labels=names(datan), cex.axis=.7, gap=3, ylab=c("Proportion","Pattern"))
+```
+
+```{r}
+mice_imputes = mice(datan)
+```
+
+```{r}
+mice_imputes$method
+```
+
+
+```{r}
+Imputed_data=complete(mice_imputes)
+datan
+Imputed_data
+```
+
+
+------------------------------------------------------------------------
+
+## With NA probability 20% :
+
+```{r}
+datan <- prodNA(data, noNA = 0.2)
+datan
+```
+
+```{r}
+md.pattern(datan)
+#shows the pattern of occurences of NA values
+```
+
+```{r}
+datamiss = aggr(datan, col=mdc(1:2), numbers=TRUE, sortVars=TRUE, 
+labels=names(datan), cex.axis=.7, gap=3, ylab=c("Proportion","Pattern"))
+```
+
+```{r}
+mice_imputes = mice(datan)
+```
+
+```{r}
+mice_imputes$method
+```
+
+
+```{r}
+Imputed_data=complete(mice_imputes)
+datan
+Imputed_data
+```
+
+
+------------------------------------------------------------------------
+
+## With NA probability 5% :
+
+```{r}
+datan <- prodNA(data, noNA = 0.05)
+datan
+```
+
+
+```{r}
+md.pattern(datan)
+#shows the pattern of occurences of NA values
+```
+
+```{r}
+datamiss = aggr(datan, col=mdc(1:2), numbers=TRUE, sortVars=TRUE, 
+labels=names(datan), cex.axis=.7, gap=3, ylab=c("Proportion","Pattern"))
+```
+
+```{r}
+mice_imputes = mice(datan)
+```
+
+```{r}
+mice_imputes$method
+```
+
+
+```{r}
+Imputed_data=complete(mice_imputes)
+datan
+Imputed_data
+```
+
+* * *
+## Conclusion:
+Using the dataset mtcars we learnt about Missing Data in R and how we can view 
+patterns of missing data. 
+

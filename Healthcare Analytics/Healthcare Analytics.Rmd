@@ -1,0 +1,348 @@
+---
+title: 'Lab 10: Healthcare Analytics'
+author: "Loura Shiny M"
+date: "11/11/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Healthcare Analytics
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to perform descriptive and predictive 
+analytics from a suitable dataset chosen in the healthcare domain. 
+The dataset can be either for regression or classification. 
+
+## To study / implement:
+
+From this Lab exercise we will be learning about Healthcare Anaylsis in R. 
+
+
+## Dataset Description:
+
+This dataset Life Expectancy (WHO) is a dataset the is collected from the
+World Helath Organization (WHO) and United Nations (UN) websits. The dataset 
+contains information, factors that influence the life expectancy of a person. 
+Immunization related factors, Mortality factors, Economical factor, Social factors, 
+like food habbits, etc was consider through the different columns such as 
+bmi, GDP, population, etc.
+
+https://www.kaggle.com/kumarajarshi/life-expectancy-who
+
+
+## Objectives:
+
+The objective her is to perform descriptive and predictive analytics for the 
+chosen dataset - Life Expectancy (WHO). The descriptive analysis will give a 
+summary of the dataset and answer the questions asked in that section
+and using linear regression we will do predictive analysis and see if the 
+Life Expectancy can be predicted from the given factors. 
+
+------------------------------------------------------------------------
+
+
+## Pre-Processing:
+
+## Sequence of Steps:
+
+
+### Importing required libraries 
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(caret)
+library(datarium)
+```
+
+
+### Importing Dataset
+
+```{r}
+Life_Expectancy = read.csv("Life Expectancy Data.csv")
+```
+
+
+### View structure of dataset 
+
+```{r}
+str(Life_Expectancy)
+```
+
+
+### Perform Data Clenaing
+
+
+### Removing missing values 
+
+```{r}
+Life_Expectancy = na.omit(Life_Expectancy)
+```
+
+
+### Summary of the dataset 
+
+```{r}
+summary(Life_Expectancy)
+```
+
+
+## Descriptive Analysis:
+
+##### Range of Adult Mortality 
+
+```{r}
+range(Life_Expectancy$Adult.Mortality)
+```
+
+The range of the Adult Mortality ranges from 1 to 723
+
+
+##### Histogram of Income composition of resources
+
+```{r}
+hist(Life_Expectancy$Income.composition.of.resources,main="Income",xlab="Income Composition")
+```
+
+
+##### Show in a pie chart the composition of the status of the countries taken in the dataset
+
+```{r}
+y=table(Life_Expectancy$Status)
+pie(y,col=c("blue","yellow"),main="Status")
+```
+
+The pie chart (pictorial representation) of the division of status of the countries 
+taken into consideration for the dataset/
+
+
+##### Boxplot of  Total expenditure
+
+```{r}
+boxplot(Life_Expectancy$Total.expenditure,mai=" Total.expenditure")
+```
+
+Box plots shows that there is a few outlier points detected.
+
+
+##### Barplot to show the distribution of data collected in terms of years
+
+```{r}
+x=table(Life_Expectancy$Year)
+barplot(x,main="Data Distribution - Year", xlab="Year", ylab="Frequency")
+```
+
+
+##### Plotting the Life Expectancy vs Schooling
+
+```{r}
+plot(Life_Expectancy$Life.expectancy,Life_Expectancy$Schooling,xlab="Life Expectancy",ylab="Schooling")
+```
+
+
+## Predictive Analysis:
+
+### Model Building
+
+Now to perform linear regression we need to remove the SPORT column. Thus, 
+
+```{r}
+Life_Expectancy_data=Life_Expectancy[,-c(1,3)]
+str(Life_Expectancy_data)
+```
+
+
+##### Train the data considering TOTAL from the dataset
+
+```{r}
+set.seed(123)
+train_samples <- Life_Expectancy_data$Life.expectancy   %>%
+createDataPartition(p=0.8,list=FALSE)
+```
+
+
+##### Split the data into training and testing data
+
+```{r}
+train <- Life_Expectancy[train_samples,]
+test <- Life_Expectancy[-train_samples,]
+```
+
+
+##### Build Linear model for the TOTAL and other columns in the datset. 
+We need to see which attribute has best p-values
+
+
+```{r}
+Life_Expectancy_model<- lm(Life.expectancy ~.,data=Life_Expectancy_data)
+summary(Life_Expectancy_model)
+```
+
+
+From summary we can see that Adjusted R-squared values is close to 1.
+This is good as it indicates that a large propotion of the variability in the 
+outcome has been explained by the regression model. Plus, 3 *'s 
+(pr lesser than 0.05 ) for the columns Year, Adult.Mortality, infant.deaths, BMI,
+under.five.deaths, HIV.AIDS, Income.composition.of.resources and Schooling 
+show that we can use them to build linear model. 
+
+
+Now, considering BMI and Life.expectancy for our model.
+
+##### Outlier Detection
+
+```{r}
+boxplot(Life_Expectancy_data$BMI,ylab="BMI")
+```
+
+No, outlier is detected from boxplot.
+
+
+###Plotting models
+
+```{r}
+hist(Life_Expectancy_model$residuals)
+```
+
+
+```{r}
+qqnorm(Life_Expectancy_model$residuals,ylab = "Residuals")
+qqline(Life_Expectancy_model$residuals)
+```
+
+
+```{r}
+par(mar=c(2,2,2,2))
+ggplot(Life_Expectancy_data,aes(x=BMI,y=Life.expectancy))+geom_point()+geom_smooth(method='lm',se=FALSE)
+```
+
+
+### Performance analysis:
+
+##### Predicting the test
+
+```{r}
+lp<-Life_Expectancy_model%>%predict(test)
+```
+
+
+##### Finding RMSE
+
+```{r}
+RMSE <- RMSE(lp,test$Life.expectancy)
+RMSE
+```
+
+The RMSE value is near to 0 which implese that a good outcome for the model.
+
+
+##### Finding R2
+
+```{r}
+R2 <- R2(lp,test$Life.expectancy)
+R2
+```
+
+The R2 value is great. This means the model output will be better.
+
+
+##### Correlation Analysis
+
+```{r}
+cor(Life_Expectancy_data$BMI,Life_Expectancy_data$Life.expectancy)
+```
+
+Positive value indicates that the that there is positive correlation between 
+BMI and Life.expectancy, i.e., they are directly  propositional to each other. 
+
+
+##### Linear Model between TOTAL and STR
+
+```{r}
+model <- lm(Life.expectancy~BMI,data=Life_Expectancy_data)
+model
+```
+
+
+```{r}
+summary(model)
+```
+
+
+```{r}
+sigma(model) 
+```
+
+
+```{r}
+sigma(model)*100/mean(Life_Expectancy_data$Life.expectancy)  #percentage error
+```
+
+The percentage of error is 10%.
+
+
+```{r}
+confint(model)
+```
+
+
+##### Finding the confidence of BMI
+
+```{r}
+BMI=25
+sdt <- data.frame(BMI)
+conf<- predict(model,sdt,level = .95,interval = "confidence")
+conf
+```
+
+
+##### Finding the prediction of STR
+
+```{r}
+lp <- predict(model,sdt,level = .95,interval = "prediction")
+lp
+```
+
+
+##### Plotting model
+
+```{r}
+plot(model,1)
+```
+
+
+------------------------------------------------------------------------
+
+
+## Results and Discussion: 
+
+From descriptive and predictive analysis we got the desired results. 
+In descriptive analysis, we can visualize the data from according to one's wish 
+using different graphs. Using linear regression, we can predict the values of 
+Life.expectancy from all the attributes as all of them had 3 *'s. 
+And the example with BMI was shown.
+
+
+* * *
+## Conclusion:
+Using the dataset Life Expectancy (WHO) we learnt about Descriptive and 
+Predictive Analysis in R by performing them on the dataset.
+
+
+## References:
+
+https://pestleanalysis.com/descriptive-analysis/
+https://machinelearningmastery.com/classification-versus-regression-in-machine-learning/
+https://machinelearningmastery.com/machine-learning-in-r-step-by-step/
+s
