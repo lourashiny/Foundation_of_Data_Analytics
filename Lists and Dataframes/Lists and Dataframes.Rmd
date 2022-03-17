@@ -1,0 +1,133 @@
+---
+title: "Lab 2: Lists and Dataframes"
+author: "Loura Shiny M"
+date: "15/08/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+------------------------------------------------------------------------
+
+##### Name   : Loura Shiny M
+
+##### Reg.No : 19BCE1524
+
+##### Title  : Lists and Dataframes 
+
+------------------------------------------------------------------------
+
+## Aim
+
+The aim of this lab experiment is to create an employee list and dataframe and execute the instructions given in each question.
+
+## To study / implement:
+
+From this Lab exercise we will be learning about lists and dataframes.
+
+## Dataset Description
+
+This is a simple employee dataset. It will contain details of employee such as their ID, name, designation, company name, date of birth, contact number, mail ID, etc.
+
+------------------------------------------------------------------------
+
+## Questions
+
+1.Create a list for an employee with the following fields:EmpId, Name, Designation, CompanyName
+
+```{r}
+employee<-list(EmpId=c("B99100"), Name=c("Amy Santiago"), Designation=c("Manager"), CompanyName=c("Brookyln Nine Nine"));
+employee
+```
+
+2. Add the fields viz., DateOfBirth, ContactNumber and MailID to the 
+above list.
+
+```{r}
+employee<-append(employee,list(DOB=as.Date("1985-05-05"),ContactNumber=c("9876543210"),MailID=c('amysantiago@gmail.com')))
+employee
+```
+
+3. Print the total number of fields and the field names.
+
+```{r}
+str(employee)
+```
+```{r}
+length(employee)
+```
+```{r}
+names(employee)
+```
+
+4. Create a data frame with the above fieldnames (5 different variables for EmpId, Name, Designation, Company, DOB) for 5 employees.
+
+```{r}
+EmpId=c("B991001","B991002","B991003","B991004","B991005")
+Name=c("Amy Santiago","Jake Peralta","Terry Jeffords","Rosa Diaz","Charles Boyle")
+Designation=c("Manager","Engineer","Regional Head","Engineer","Technician")
+Company=c("Brooklyn Nine Nine","Brooklyn Nine Nine","Brooklyn Nine Nine","Brooklyn Nine Nine","Brooklyn Nine Nine")
+d1="1985-05-05"
+d1<-as.Date(d1)
+d2="1985-10-15"
+d2<-as.Date(d2)
+d3="1975-09-23"
+d3<-as.Date(d3)
+d4="1990-01-12"
+d4<-as.Date(d4)
+d5="1983-08-09"
+d5<-as.Date(d5)
+DOB=c(d1,d2,d3,d4,d5)
+employeedf=data.frame(EmpId, Name, Designation, Company, DOB)
+employeedf
+```
+
+5. Add the ContactNumber and MailID to this already created data frame.
+
+```{r}
+employeedf$ContactNumber<-c("9876543210","1234567890","3786297501","2491823018","91827362071")
+employeedf
+```
+```{r}
+employeedf$MailID<-c("amysantiago@gmail.com","jakeperalta@gmail.com","teryyjefords@gmail.com","rosadiaz@gmail.com","charlesboyle@gmail.com")
+employeedf
+```
+
+6. Add the details of employee 3 without contact number and employee4
+without mentioning mailID.
+```{r}
+employeedf[3,6]<-NA
+employeedf[4,7]<-NA
+employeedf
+```
+
+7. Display the details of the employees after removing the missing values.
+
+```{r}
+employeedf1=employeedf[complete.cases(employeedf), ]
+employeedf1
+```
+
+8. Display the details of employees who celebrate birthday in the month of August.
+
+```{r}
+subset(employeedf,months(as.Date(employeedf$DOB))=="August")
+```
+
+9. Display the details of employees whose designation is “Manager”.
+```{r}
+employeedf[employeedf$Designation=="Manager", ] 
+```
+
+10.Calculate the age of all the employees (as on August 12, 2021) and include it as an additional column in the same data frame.
+
+```{r}
+library(eeptools)
+```
+
+```{r}
+Age=c(floor(age_calc(employeedf$DOB,units="years"))) 
+employeedf=cbind(employeedf,Age) 
+employeedf
+```
+
